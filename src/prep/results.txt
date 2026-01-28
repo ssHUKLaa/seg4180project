@@ -1,0 +1,8 @@
+=== MIDI SMOKETEST ===
+files: 1276
+failed: 0
+note_on: 7040164
+note_off: 7040164
+tempos: 1 unique
+ticks_per_beat: 2 unique
+tracks: 1 unique
