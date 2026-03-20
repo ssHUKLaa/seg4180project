@@ -110,7 +110,6 @@ void CommandServer::run()
         if (!serverSocket)
             break;
 
-        // Accept incoming connection (blocking, timeout 1000ms)
         auto incomingSocket = serverSocket->waitForNextConnection();
         
         if (!incomingSocket)
@@ -118,7 +117,6 @@ void CommandServer::run()
 
         clientSocket = std::unique_ptr<juce::StreamingSocket>(incomingSocket);
 
-        // Read JSON command
         juce::MemoryOutputStream buffer;
         char readBuf[4096];
         int bytesRead = 0;
@@ -127,7 +125,6 @@ void CommandServer::run()
         {
             buffer.write(readBuf, bytesRead);
             
-            // Simple check: if we got a complete JSON object, process it
             auto str = buffer.toString();
             if (str.contains("}"))
                 break;
@@ -143,7 +140,6 @@ void CommandServer::run()
 
         try
         {
-            // Parse and handle command
             juce::var jsonCmd = juce::JSON::parse(jsonStr);
             juce::var response;
 
@@ -159,7 +155,6 @@ void CommandServer::run()
                 handleCommand(jsonCmd, response);
             }
 
-            // Send response
             auto responseStr = juce::JSON::toString(response);
             clientSocket->write(responseStr.toRawUTF8(), (int) responseStr.getNumBytesAsUTF8());
             clientSocket->close();

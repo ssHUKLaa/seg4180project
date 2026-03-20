@@ -41,27 +41,23 @@ PluginManager::~PluginManager()
 juce::StringArray PluginManager::scanForPlugins()
 {
     juce::StringArray plugins;
-    
-    // Get standard plugin directories
+
     juce::Array<juce::File> pluginSearchPaths;
-    
-    // Windows VST3 directory
+
     juce::File vst3Dir (juce::File::getSpecialLocation(
         juce::File::commonApplicationDataDirectory)
         .getChildFile("VST3"));
     
     if (vst3Dir.exists())
         pluginSearchPaths.add(vst3Dir);
-    
-    // VST2 directory (legacy)
+
     juce::File vst2Dir (juce::File::getSpecialLocation(
         juce::File::commonApplicationDataDirectory)
         .getChildFile("Steinberg/VSTPlugins"));
     
     if (vst2Dir.exists())
         pluginSearchPaths.add(vst2Dir);
-    
-    // Scan for .vst3 files
+
     for (const auto& dir : pluginSearchPaths)
     {
         juce::Array<juce::File> foundFiles;
@@ -347,8 +343,6 @@ void PluginManager::addMidiEvent(int note, int velocity, int samplePosition, boo
 {
     juce::ignoreUnused(samplePosition);
 
-    // This will be connected to the MIDI router
-    // For now, just maintain state
     if (isNoteOn)
         midiKeyboardState.noteOn(1, note, velocity / 127.0f);
     else

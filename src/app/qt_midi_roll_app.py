@@ -202,7 +202,6 @@ class PianoRollView(QGraphicsView):
         self._last_max_tick = int(max_tick)
         self._last_length_sec = float(mid.length)
 
-        # Grid backdrop and piano keyboard strip.
         roll_w = max(1600, int(max_tick * self.px_per_tick) + 200)
         total_w = self.key_w + roll_w
         total_h = 128 * self.row_h
@@ -220,7 +219,6 @@ class PianoRollView(QGraphicsView):
             self.scene.addRect(0, y, self.key_w, self.row_h, no_pen, key_color)
             self.scene.addRect(self.key_w, y, roll_w, self.row_h, no_pen, lane_color)
 
-            # Label every key with uniform text size.
             text_color = QColor("#ececec") if is_black else QColor("#101010")
             label = self.scene.addSimpleText(self._note_name(pitch), label_font)
             label.setBrush(text_color)
@@ -231,15 +229,12 @@ class PianoRollView(QGraphicsView):
             label.setPos(label_x, label_y)
             label.setZValue(20)
 
-        # Stronger octave separators.
         for n in range(0, 128, 12):
             y = (127 - n) * self.row_h
             self.scene.addRect(0, y, total_w, 1, no_pen, QColor("#4a4a4a"))
 
-        # Split line between keyboard and timeline.
         self.scene.addRect(self.key_w - 1, 0, 1, total_h, no_pen, QColor("#5a5a5a"))
 
-        # Draw notes
         for start, end, pitch in notes:
             x = self.key_w + (start * self.px_per_tick)
             w = max(1.0, (end - start) * self.px_per_tick)
@@ -249,7 +244,6 @@ class PianoRollView(QGraphicsView):
             item.setPen(QColor("#2f6fa6"))
             self.scene.addItem(item)
 
-        # Playhead on top of everything.
         playhead = QGraphicsRectItem(self.key_w, 0, 2, total_h)
         playhead.setBrush(QColor("#ff5252"))
         playhead.setPen(QPen(Qt.NoPen))
@@ -259,10 +253,8 @@ class PianoRollView(QGraphicsView):
 
         self.scene.setSceneRect(0, 0, total_w, total_h)
 
-        # Avoid fitInView scaling because it makes text on keys render poorly.
         self.resetTransform()
 
-        # On first load, focus viewport around played pitch range.
         if self._first_load:
             if pitches:
                 center_pitch = int(sum(pitches) / len(pitches))
@@ -527,7 +519,6 @@ class MainWindow(QMainWindow):
         self.player_cmd_edit = QLineEdit("")
         self.player_cmd_edit.setPlaceholderText("Optional external player/VST host command, use {midi} placeholder")
 
-        # VST3 host integration
         self.use_vst_cb = QCheckBox()
         self.use_vst_cb.setChecked(False)
         
@@ -611,7 +602,6 @@ class MainWindow(QMainWindow):
         self.vst_play_in_progress = False
         self.vst_loaded_at = 0.0
 
-        # Start sidecar in the background when the app launches.
         QTimer.singleShot(0, self._auto_start_sidecar)
 
     def log(self, msg: str) -> None:
@@ -664,7 +654,6 @@ class MainWindow(QMainWindow):
             if self.vst_client.last_launch_path is not None:
                 self.log(f"VST host binary: {self.vst_client.last_launch_path}")
         else:
-            # Keep startup non-blocking; user can still use internal/external playback.
             self.log(f"VST host sidecar not available: {self.vst_client.last_error}")
 
     def _load_vst_plugin(self, vst_path: str) -> None:
@@ -675,14 +664,12 @@ class MainWindow(QMainWindow):
 
         self.vst_load_in_progress = True
         try:
-            # Start sidecar if not running
             if not self.vst_client.is_connected():
                 self.log("Starting VST host sidecar...")
                 if not self.vst_client.start_sidecar(force_clean=True):
                     QMessageBox.warning(self, "VST Error", f"Failed to start sidecar:\n{self.vst_client.last_error}")
                     return
 
-            # Load plugin
             self.log(f"Loading VST plugin: {vst_path}")
             if self.vst_client.load_plugin(vst_path):
                 self.log("VST plugin loaded successfully")
@@ -691,10 +678,8 @@ class MainWindow(QMainWindow):
                 self.use_vst_cb.setChecked(True)
             else:
                 err = self.vst_client.last_error.lower()
-                # If host dropped the socket during load, restart once and retry.
                 if "forcibly closed" in err or "connection reset" in err or "connection aborted" in err:
                     if self.vst_client.is_connected():
-                        # Host can stay alive while plugin load resets this socket.
                         self.log("VST load socket reset, sidecar still running; retrying load once...")
                         if self.vst_client.load_plugin(vst_path):
                             self.log("VST plugin loaded successfully (after retry)")
@@ -739,7 +724,6 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "VST Error", "No VST plugin loaded. Pick a .vst3 first.")
             return
 
-        # Some plugins need a brief settle time after load before editor creation.
         elapsed_since_load = time.perf_counter() - self.vst_loaded_at
         if elapsed_since_load < 1.2:
             wait_ms = int((1.2 - elapsed_since_load) * 1000)
@@ -847,7 +831,6 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "No MIDI loaded", "Load or generate a MIDI file first.")
             return
 
-        # VST playback (highest priority)
         if self.use_vst_cb.isChecked():
             self.vst_play_in_progress = True
             if not self.vst_client.is_connected():
@@ -874,7 +857,6 @@ class MainWindow(QMainWindow):
             self.vst_play_in_progress = False
             return
 
-        # External command playback
         cmd_template = self.player_cmd_edit.text().strip()
         if cmd_template:
             self._play_with_external_cmd(path, cmd_template)
@@ -882,7 +864,6 @@ class MainWindow(QMainWindow):
             self.external_playing = True
             return
 
-        # Internal synth playback
         if not self.midi_player.available():
             QMessageBox.warning(
                 self,
@@ -908,7 +889,6 @@ class MainWindow(QMainWindow):
         self.log("Playback stopped")
 
     def _start_playhead(self, midi_path: Path) -> None:
-        # Ensure the loaded roll matches what is being played for accurate mapping.
         if self.current_midi_path != midi_path:
             self.roll.load_midi(midi_path)
             self.current_midi_path = midi_path

@@ -54,7 +54,6 @@ class VstHostClient:
             return True
 
         if self.sidecar_path is None:
-            # Auto-detect from default location
             base = _resolve_runtime_root() / "sidecar" / "vst-host" / "Builds" / "VisualStudio2022" / "x64"
             release_path = base / "Release" / "ConsoleApp" / "vst-host.exe"
             debug_path = base / "Debug" / "ConsoleApp" / "vst-host.exe"
@@ -92,7 +91,6 @@ class VstHostClient:
             self._auto_launched = True
             self.last_launch_path = self.sidecar_path
 
-            # Wait for the sidecar to bind the TCP port.
             deadline = time.time() + 6.0
             while time.time() < deadline:
                 if self.sidecar_process and self.sidecar_process.poll() is not None:
@@ -147,20 +145,17 @@ class VstHostClient:
 
             request = json.dumps(payload)
             sock.sendall(request.encode("utf-8"))
-            # Signal end-of-request so the server can finish blocking reads.
             try:
                 sock.shutdown(socket.SHUT_WR)
             except Exception:
                 pass
 
-            # Read response
             response_data = b""
             while True:
                 chunk = sock.recv(4096)
                 if not chunk:
                     break
                 response_data += chunk
-                # Simple check: if we got closing brace, assume complete
                 if response_data.endswith(b"}"):
                     break
 

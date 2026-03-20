@@ -11,13 +11,11 @@ public:
     PluginManager();
     ~PluginManager();
 
-    // Plugin discovery and loading
     juce::StringArray scanForPlugins();
     bool loadPlugin(const juce::File& pluginFile);
     void unloadPlugin();
     bool isPluginLoaded() const { return pluginLoaded.load(); }
 
-    // Playback control
     void prepare(double sampleRate, int blockSize);
     void processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages);
     void releaseResources();
@@ -27,17 +25,14 @@ public:
     bool isPlaying() const { return playing.load(); }
     bool isMidiLoaded() const;
 
-    // MIDI input
     void addMidiEvent(int note, int velocity, int samplePosition, bool isNoteOn);
 
-    // VST3 parameter control
     juce::Array<juce::AudioProcessorParameter*> getParameters();
     void setParameter(int paramIndex, float value);
     bool hasEditor() const;
     bool showEditor();
     void hideEditor();
 
-    // Metadata
     juce::String getPluginName() const;
     juce::String getLastError() const { return lastError; }
 
