@@ -42,9 +42,32 @@ for midi_path in midi_files:
         stats["failed"] += 1
         bad_files.append((midi_path.name, str(e)))
 
+print()
 print("=== MIDI SMOKETEST ===")
-for k, v in stats.items():
-    if isinstance(v, Counter):
-        print(f"{k}: {len(v)} unique")
-    else:
-        print(f"{k}: {v}")
+print(f"files         : {stats['files']}")
+print(f"failed        : {stats['failed']}")
+print(f"note_on       : {stats['note_on']:,}")
+print(f"note_off      : {stats['note_off']:,}")
+
+print()
+print("ticks_per_beat distribution:")
+for val, count in sorted(stats["ticks_per_beat"].items()):
+    print(f"  {val:6d} ticks/beat  ->  {count} file(s)")
+
+print()
+print("track count distribution:")
+for val, count in sorted(stats["tracks"].items()):
+    print(f"  {val} track(s)  ->  {count} file(s)")
+
+print()
+print(f"unique tempo values: {len(stats['tempos'])}")
+top_tempos = stats["tempos"].most_common(5)
+for tempo, count in top_tempos:
+    bpm = round(60_000_000 / tempo, 1)
+    print(f"  tempo={tempo} ({bpm} BPM)  ->  {count} occurrence(s)")
+
+if bad_files:
+    print()
+    print("FAILED files:")
+    for name, err in bad_files:
+        print(f"  {name}: {err}")

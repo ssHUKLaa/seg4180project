@@ -1,6 +1,9 @@
 data/
 Scripts/
 pyvenv.cfg
+Lib/
+Include/
+share/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -218,3 +221,45 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# -----------------------------------------------------------------------------
+# C++ / Visual Studio / JUCE sidecar
+# -----------------------------------------------------------------------------
+
+# Visual Studio user and cache files
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.VC.opendb
+
+# MSVC / linker outputs
+*.obj
+*.pdb
+*.ilk
+*.idb
+*.ipdb
+*.iobj
+*.exp
+*.lib
+
+# Build logs / intermediates
+*.tlog
+*.lastbuildstate
+*.recipe
+*.log
+
+# JUCE/VS generated build trees
+sidecar/vst-host/Builds/**/x64/Debug/
+sidecar/vst-host/Builds/**/x64/Release/
+
+# Sidecar runtime logs
+sidecar/vst-host/logs/
+
+# -----------------------------------------------------------------------------
+# Release artifacts
+# -----------------------------------------------------------------------------
+
+release/*.zip
